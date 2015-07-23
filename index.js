@@ -30,22 +30,30 @@ inquirer.prompt( questions, function( answers ) {
         var parsedOriginal = url.parse( currentOriginal.v );
         var parsedRedirect = url.parse( currentRedirect.v );
 
-        // If there is a query in the original url we need to add a RewriteCond
-        if ( parsedOriginal.query ) {
-            outputString += "RewriteCond %{QUERY_STRING} ^" + parsedOriginal.query + "$\n";
+        if ( parsedOriginal.pathname.replace( /^\//, "" ) != "" ) {
+            // If there is a query in the original url we need to add a RewriteCond
+            if ( parsedOriginal.query ) {
+                outputString += "RewriteCond %{QUERY_STRING} ^" + parsedOriginal.query + "$\n";
+            }
+
+            // Create the rewrite rule
+            outputString += "RewriteRule ^" + parsedOriginal.pathname.replace( /^\//, "" ) + "$ " + decodeURIComponent( currentRedirect.v );
+
+            // If the original url has a query string and the redirect doesn't we need to add a
+            // ? to the redirect url to prevent the query being passed forward
+            if ( parsedOriginal.query && !parsedRedirect.query ) {
+                // For some reason, to make sure the query doesn't pass on parameters, the redirect
+                // url must end in a slash followed by the ?
+                if ( outputString.substr(-1) != '/' ) {
+                    outputString += '/';
+                }
+
+                outputString += "? [QSD,R=301,L]\n";
+            } else {
+                outputString += " [R=301,L]\n";
+            }
+
         }
-
-        // Create the rewrite rule
-        outputString += "RewriteRule ^" + parsedOriginal.pathname + "$ " + currentRedirect.v;
-
-        // If the original url has a query string and the redirect doesn't we need to add a
-        // ? to the redirect url to prevent the query being passed forward
-        if ( parsedOriginal.query && !parsedRedirect.query ) {
-            outputString += "?";
-        }
-
-        // Finish the rewrite rule
-        outputString += " [R=301, L]\n";
 
         // Get the next urls
         originalUrls.row++;
