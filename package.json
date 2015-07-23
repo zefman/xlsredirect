@@ -1,0 +1,24 @@
+{
+  "name": "xlsredirect",
+  "version": "1.0.0",
+  "description": "Takes an excel file with a list of original urls and urls to redirect to and create a htaccess file with the redirects",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/zefman/xlsredirect.git"
+  },
+  "author": "Jozef Maxted",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/zefman/xlsredirect/issues"
+  },
+  "homepage": "https://github.com/zefman/xlsredirect",
+  "dependencies": {
+    "URIjs": "^1.15.2",
+    "inquirer": "^0.9.0",
+    "xlsx": "^0.8.0"
+  }
+}
