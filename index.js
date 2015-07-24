@@ -4,13 +4,14 @@ var inquirer = require("inquirer");
 var XLSX     = require('xlsx');
 var url      = require('url');
 var fs       = require('fs');
+var colors   = require('colors');
 
 console.log('XLS Redirect Maker');
 
 var questions = [
-    { type: "input", name: "sourcePath", message: "Full path to the sheet?", default: "/Users/jozefmaxted/Documents/Designs/WTW/wtw_redirects_final.xlsx" },
+    { type: "input", name: "sourcePath", message: "Full path to the spreadsheet file?", default: "/Users/jozefmaxted/Documents/Designs/WTW/wtw_redirects_final.xlsx" },
     { type: "input", name: "orginalStartCell", message: "What is the first cell containing the original urls?", default: "A2" },
-    { type: "input", name: "redirectStartCell", message: "What is the first cell containing the redirect urls?", default: "E2" }
+    { type: "input", name: "redirectStartCell", message: "What is the first cell containing the redirect urls?", default: "B2" }
 ];
 
 inquirer.prompt( questions, function( answers ) {
@@ -48,9 +49,9 @@ inquirer.prompt( questions, function( answers ) {
                     outputString += '/';
                 }
 
-                outputString += "? [QSD,R=301,L]\n";
+                outputString += "? [R=301,L,QSD]\n";
             } else {
-                outputString += " [R=301,L]\n";
+                outputString += " [R=301,L,QSD]\n";
             }
 
         }
@@ -65,6 +66,6 @@ inquirer.prompt( questions, function( answers ) {
 
     fs.writeFile( "output.txt", outputString, function( err ) {
         if (err) throw err;
-        console.log( "Created output" );
+        console.log( colors.green( "Created output redirect file" ) );
     } );
 });

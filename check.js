@@ -9,12 +9,15 @@ var colors   = require('colors');
 
 process.stdin.setMaxListeners(0);
 
-console.log( 'XLS Redirect Checker'.rainbow );
+console.log( 'XLS Redirect Checker'.underline.rainbow );
 
 var questions = [
-    { type: "input", name: "sourcePath", message: "Full path to the sheet?", default: "/Users/jozefmaxted/Documents/Designs/WTW/wtw_redirects_final.xlsx" },
+    { type: "input", name: "sourcePath", message: "Full path to the sheet?" },
     { type: "input", name: "orginalStartCell", message: "What is the first cell containing the original urls?", default: "A2" },
-    { type: "input", name: "redirectStartCell", message: "What is the first cell containing the redirect urls?", default: "E2" }
+    { type: "input", name: "redirectStartCell", message: "What is the first cell containing the redirect urls?", default: "B2" },
+    { type: "confirm", name: "basicAuth", message: "Do these links require basic auth?" },
+    { type: "input", name: "basicAuthUser", message: "Basic auth user:", when: function( response ) { return response.basicAuth; } },
+    { type: "input", name: "basicAuthPwd", message: "Basic auth password:", when: function( response ) { return response.basicAuth; } }
 ];
 
 inquirer.prompt( questions, function( answers ) {
@@ -27,6 +30,13 @@ inquirer.prompt( questions, function( answers ) {
     var passed = 0;
     var failed = 0;
     var total  = 0;
+    var start = new Date().getTime();
+
+    // Build any necessary request headers
+    var headers = {};
+    if ( answers.basicAuth ) {
+        headers["Authorization"] =  "Basic " + new Buffer( answers.basicAuthUser + ":" + answers.basicAuthPwd ).toString( "base64" );
+    }
 
     // Get the first original and redirect url
     var currentOriginal = sheet[ originalUrls.column + originalUrls.row ];
@@ -41,9 +51,7 @@ inquirer.prompt( questions, function( answers ) {
             var r = request.get( {
                     url: currentOriginal.v,
                     //maxRedirects: 1,
-                    headers : {
-                        "Authorization" : "Basic " + new Buffer( "uat:aroundtheworld" ).toString( "base64" )
-                    }
+                    headers: headers
                 } , function (err, res, body) {
                     //var removeSlash = currentRedirect.v.replace(/\/$/, "");
                     if ( res && decodeURIComponent( res.request.uri.href.replace(/\/$/, "") ) == currentRedirect.v.replace(/\/$/, "") ) {
@@ -68,7 +76,7 @@ inquirer.prompt( questions, function( answers ) {
 
                     total++;
 
-                    console.log( "Passed: ".green + passed + " Failed: ".red + failed + " Total: " + total );
+                    console.log( colors.green( "Passed: " + passed ) + colors.red( " Failed: " + failed ) + colors.cyan( " Total: " + total ) );
 
                     // Get the next urls
                     originalUrls.row++;
@@ -81,13 +89,18 @@ inquirer.prompt( questions, function( answers ) {
 
             } );
         } else {
-            console.log( "Passed: " + passed );
-            console.log( "Failed: " + failed );
+
+            var end = new Date().getTime();
+            var time = ( end - start ) / 1000;
+
+            console.log( colors.cyan( "\n\nFinished in: " + time + "s" ) );
+            console.log( colors.green( "Passed: " + passed ) );
+            console.log( colors.red( "Failed: " + failed ) );
             console.log( "Total: " + total );
 
             fs.writeFile( "failed.txt", outputString, function( err ) {
                 if (err) throw err;
-                console.log( "Created output" );
+                console.log( "Created failed file" );
             } );
         }
 
