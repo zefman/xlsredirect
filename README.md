@@ -1,8 +1,6 @@
 # XLS Redirect Generator
 
-This is a simple node command line tool for generating .htaccess rewrite redirects from any xls/xlsx file.
-
-A basic redirect checker is also included and can work off the same file used to generate the redirects.
+This is a simple node command line tool for generating .htaccess rewrite redirects from any xls/xlsx file. A basic redirect checker is also included and can work off the same file used to generate the redirects.
 
 ## Generator Usage
 
